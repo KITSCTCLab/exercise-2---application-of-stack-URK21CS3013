@@ -1,3 +1,4 @@
+import operator
 class Evaluate:
   """This class validates and evaluate postfix expression.
   Attributes:
@@ -11,9 +12,7 @@ class Evaluate:
   def __init__(self, size):
     """Inits Evaluate with top, size_of_stack and stack.
     Arguments:
-      top:An integer which points to the top most element in the stack.
-      size_of_stack: An integer which represents size of stack.
-      stack: A list which maintians the elements of stack.
+      size_of_stack: An integer to set the size of stack.
     """
     self.top = -1
     self.size_of_stack = size
@@ -26,22 +25,19 @@ class Evaluate:
     Returns:
       True if it is empty, else returns False.
     """
-    # Write your code here
-    if self.top == -1:
-      return True
-    else:
-      return False
+    return self.top == -1
 
 
-  def pop(self):
+  def mypop(self):
     """
     Do pop operation if the stack is not empty.
     Returns:
       The data which is popped out if the stack is not empty.
     """
-    # Write your code here
     if not self.isEmpty():
-      self.stack.pop()
+        x = self.stack.pop()
+        self.top = self.top - 1
+        return x
 
 
   def push(self, operand):
@@ -50,9 +46,8 @@ class Evaluate:
     Arguments:
       operand: The operand to be pushed.
     """
-    # Write your code here
-    if self.top != self.size_of_stack - 1:
-      self.stack.append(operand)
+    self.top += 1
+    self.stack.append(operand)
 
 
   def validate_postfix_expression(self, expression):
@@ -63,18 +58,13 @@ class Evaluate:
     Returns:
       True if the expression is valid, else returns False.
     """
-    # Write your code here
-    nums = 0
-    ops = 0
-    for element in expression:
-      if element.isnumeric():
-        nums = nums + 1
-      else:
-        ops = ops + 1
-    if ops == nums - 1:
-      return True
-    else:
-      return False
+    counter_digit = counter_operand = 0
+    for token in expression:
+        if token.isdigit():
+            counter_digit += 1
+        else:
+            counter_operand += 1
+    return counter_digit == counter_operand + 1
 
 
   def evaluate_postfix_expression(self, expression):
@@ -85,28 +75,25 @@ class Evaluate:
     Returns:
       The result of evaluated postfix expression.
     """
-    # Write your code here
-    stack = []
-    for i in expression:
-      if i.isnumeric():
-        stack.append(int(i))
-      if len(stack) >= 2:
-        if i == '+':
-          stack[-2] = stack[-2] + stack[-1]
-          stack.pop()
-        elif i == '-':
-          stack[-2] = stack[-2] - stack[-1]
-          stack.pop()
-        elif i == '*':
-          stack[-2] = stack[-2] * stack[-1]
-          stack.pop()
-        elif i == '/':
-          stack[-2] = stack[-2] / stack[-1]
-          stack.pop()
-        elif i == '^':
-          stack[-2] = stack[-2] ^ stack[-1]
-          stack.pop()
-    return int(stack[-1])
+    ops = {
+    '+' : operator.add,
+    '-' : operator.sub,
+    '*' : operator.mul,
+    '/' : operator.truediv,
+    '%' : operator.mod,
+    '^' : operator.xor,
+    }
+    for token in expression:
+        if token.isdigit():
+            self.push(int(token))
+        else:
+            operand2 = self.mypop()
+            operand1 = self.mypop()
+            result = ops[token](operand1, operand2)
+            self.push(int(result))
+    return self.stack[0]
+
+
 
 # Do not change the following code
 postfix_expression = input()  # Read postfix expression
